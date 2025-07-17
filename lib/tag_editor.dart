@@ -100,7 +100,9 @@ class TagEditor<T> extends StatefulWidget {
       this.scrollDuration = const Duration(milliseconds: 300),
       this.alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
       this.scrollAlignment = 0.0,
-      this.loadMoreSuggestions})
+      this.showTag = false,
+      this.loadMoreSuggestions,
+    })
       : assert(
             !autoHideTextInputField ||
                 (!hasAddButton &&
@@ -220,6 +222,7 @@ class TagEditor<T> extends StatefulWidget {
   final Duration scrollDuration;
   final double scrollAlignment;
   final ScrollPositionAlignmentPolicy? alignmentPolicy;
+  final bool showTag;
 
   @override
   TagsEditorState<T> createState() => TagsEditorState<T>();
@@ -420,9 +423,8 @@ class TagsEditorState<T> extends State<TagEditor<T>> {
           final size = renderBox!.size;
           final renderBoxOffset = renderBox!.localToGlobal(Offset.zero);
           final topAvailableSpace = renderBoxOffset.dy + size.height - 20;
-          final mq = MediaQuery.of(context);
-          final bottomAvailableSpace = mq.size.height -
-              mq.viewInsets.bottom -
+          final bottomAvailableSpace = MediaQuery.sizeOf(context).height -
+              MediaQuery.viewInsetsOf(context).bottom -
               renderBoxOffset.dy -
               size.height;
 
@@ -550,7 +552,7 @@ class TagsEditorState<T> extends State<TagEditor<T>> {
                     widget.suggestionItemHeight ?? defaultItemHeight;
                 final heightSuggestion = itemHeight * snapshot.data!.length;
                 final offsetY = min(heightSuggestion, suggestionBoxHeight);
-                final compositedTransformFollowerOffset = showTop && offsetY > bottomAvailableSpace
+                final compositedTransformFollowerOffset = showTop
                     ? Offset(0, -1.0 * (offsetY + itemHeight))
                     : Offset.zero;
 
@@ -926,13 +928,15 @@ class TagsEditorState<T> extends State<TagEditor<T>> {
             textWidth: _getTextWidth(_previousText, textStyle: textStyle),
             isHideTextField: isHideTextField),
         children: [
-          ...List<Widget>.generate(
-            widget.length,
-            (index) => LayoutId(
-              id: TagEditorLayoutDelegate.getTagId(index),
-              child: widget.tagBuilder(context, index),
+          if (widget.showTag)...[
+            ...List<Widget>.generate(
+              widget.length,
+              (index) => LayoutId(
+                id: TagEditorLayoutDelegate.getTagId(index),
+                child: widget.tagBuilder(context, index),
+              ),
             ),
-          ),
+          ],
           LayoutId(
               id: TagEditorLayoutDelegate.textFieldId,
               child: widget.focusNodeKeyboard != null
