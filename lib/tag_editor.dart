@@ -97,6 +97,9 @@ class TagEditor<T> extends StatefulWidget {
       this.isLoadMoreReplaceAllOld = true,
       this.onFocusTextInput,
       this.onSelectOptionAction,
+      this.scrollDuration = const Duration(milliseconds: 300),
+      this.alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
+      this.scrollAlignment = 0.0,
       this.loadMoreSuggestions})
       : assert(
             !autoHideTextInputField ||
@@ -214,6 +217,9 @@ class TagEditor<T> extends StatefulWidget {
   final double? suggestionItemHeight;
   final bool isLoadMoreOnlyOnce;
   final bool isLoadMoreReplaceAllOld;
+  final Duration scrollDuration;
+  final double scrollAlignment;
+  final ScrollPositionAlignmentPolicy? alignmentPolicy;
 
   @override
   TagsEditorState<T> createState() => TagsEditorState<T>();
@@ -715,10 +721,13 @@ class TagsEditorState<T> extends State<TagEditor<T>> {
   void _scrollToVisible() {
     Future.delayed(const Duration(milliseconds: 300), () {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
-        if (mounted) {
-          final renderBox = context.findRenderObject() as RenderBox;
-          await Scrollable.of(context).position.ensureVisible(renderBox);
-        }
+        final renderBox = context.findRenderObject() as RenderBox;
+        await Scrollable.of(context).position.ensureVisible(
+          renderBox,
+          duration: widget.scrollDuration,
+          alignment: widget.scrollAlignment,
+          alignmentPolicy: widget.alignmentPolicy ?? ScrollPositionAlignmentPolicy.explicit,
+        );
       });
     });
   }
