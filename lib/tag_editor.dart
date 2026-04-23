@@ -387,6 +387,7 @@ class TagsEditorState<T> extends State<TagEditor<T>> {
 
   void _onFocusChanged() {
     if (_focusNode.hasFocus) {
+      _onSearchChanged(_textFieldController.text);
       if (widget.focusNodeKeyboard != null) {
         widget.onFocusTagAction?.call(false);
         _countBackspacePressed = 0;
